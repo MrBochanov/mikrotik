@@ -1,0 +1,20 @@
+:global gw [/ip route get [/ip route find dst-address=0.0.0.0/0 active=yes routing-mark!=comlink] gateway]   
+
+:global oldgw [/file get gw.txt contents]
+
+:if ([$gw] != [$oldgw ]) do={
+	if ($gw = "1.1.1.1") do={
+		/interface gre enable gre-GIGA
+		/interface gre enable gre-hetzner
+		/interface gre disable gre-GIGA2
+		/interface gre disable gre-hetzner2
+	}
+	if ($gw = "2.2.2.2") do={
+		/interface gre disable gre-GIGA
+		/interface gre disable gre-hetzner
+		/interface gre enable gre-GIGA2
+		/interface gre enable gre-hetzner2
+	}
+	:log warning message="SwitchGRE Script discovered a gateway change at $[/system clock get time]" 
+	/file set gw.txt contents=[$gw] 
+	} else={ :log warning message="SwitchGRE Script NOT discovered a gateway change at $[/system clock get time]" } 	
